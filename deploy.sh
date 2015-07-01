@@ -4,7 +4,8 @@ if [ -z "${1}" ]; then
    marathon="192.168.59.103"
 else
    version="${1}"
-   marathon=${MARATHON_PORT_8080_TCP_ADDR}
+   #marathon=${MARATHON_PORT_8080_TCP_ADDR}
+   marathon="192.168.59.103"
 fi
 
 curl -X DELETE -H "Content-Type: application/json" http://${marathon}:8090/v2/apps/app 
