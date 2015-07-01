@@ -6,4 +6,4 @@ else
 version="${1}"
 fi
 
-docker build -t localhost:5000/containersol/nodejs_app:${version} .
+docker build -t 192.168.59.103:5000/containersol/nodejs_app:${version} .

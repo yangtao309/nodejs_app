@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ -z "${1}" ]; then
    version="latest"
-   marathon="localhost"
+   marathon="192.168.59.103"
 else
    version="${1}"
    marathon=${MARATHON_PORT_8080_TCP_ADDR}
