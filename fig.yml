@@ -71,7 +71,7 @@ chronos:
   ports:
     - "8070:8081"
     - "4400:4400"
- command: --restart=on-failure:10 -m 1g
+  command: --restart=on-failure:10 -m 1g
  
 jenkins:
   image: docker.fenxibao.com/csanchez/jenkins-swarm
@@ -97,4 +97,3 @@ jenkinsSlave2:
     - jenkins:master
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
-  command: --privileged
