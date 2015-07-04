@@ -37,25 +37,23 @@ slave:
     - MESOS_LOG_DIR=/var/log
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
-    - /usr/bin/docker:/usr/bin/docker
   expose:
     - "5051:5051"
+
+slave5052:                                                                                   
+  image: docker.fenxibao.com/redjack/mesos-slave:0.21.0                                  
+  links:                                                                                 
+    - zookeeper:zookeeper                                                                
+    - master:master                                                                      
+  environment:                                                                           
+    - MESOS_MASTER=zk://zookeeper:2181/mesos                                             
+    - MESOS_EXECUTOR_REGISTRATION_TIMEOUT=5mins                                          
+    - MESOS_LOG_DIR=/var/log                                                             
+  volumes:                                                                               
+    - /var/run/docker.sock:/var/run/docker.sock                                          
+  expose:                                                                                
+    - "5052:5051" 
     
-slave5052:
-  image: docker.fenxibao.com/redjack/mesos-slave:0.21.0
-  links:
-    - zookeeper:zookeeper
-    - master:master
-  environment:
-    - MESOS_MASTER=zk://zookeeper:2181/mesos
-    - MESOS_EXECUTOR_REGISTRATION_TIMEOUT=5mins
-    - MESOS_LOG_DIR=/var/log
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - /usr/bin/docker:/usr/bin/docker
-  expose:
-    - "5052:5052"
-   
 chronos:
   image: docker.fenxibao.com/boritzio/docker-chronos:latest
   links:
@@ -70,9 +68,8 @@ chronos:
  
 jenkins:
   image: docker.fenxibao.com/csanchez/jenkins-swarm
-  hostname: jenkins
   volumes:
-    - /var/jenkins_home:/mnt/sda1/jenkins_home
+    - /mnt/sda1/jenkins_home:/mnt/sda1/jenkins_home
     - /var/run/docker.sock:/var/run/docker.sock
     - /usr/bin/docker:/usr/bin/docker
   ports: 
@@ -82,7 +79,7 @@ jenkins:
 jenkinsSlave1:
   image: docker.fenxibao.com/spiddy/dind-jenkins-slave
   links: 
-    - jenkins:jenkins
+    - jenkins:master
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
 
@@ -90,6 +87,6 @@ jenkinsSlave1:
 jenkinsSlave2:
   image: docker.fenxibao.com/spiddy/dind-jenkins-slave
   links: 
-    - jenkins:jenkins
+    - jenkins:master
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
