@@ -1,9 +1,9 @@
 #!/bin/bash
 
 if [ -z "${1}" ]; then
-version="latest"
+   version="latest"
 else
-version="${1}"
+   version="${1}"
 fi
 
-docker build -t localhost:5000/containersol/nodejs_app:${version} .
+docker build -t docker.fenxibao.com/containersol/nodejs_app:${version} .
