@@ -23,6 +23,8 @@ marathon:
     - zookeeper:zookeeper
   ports:
     - "8090:8080"
+  volumes:                                                                               
+    - /var/run/docker.sock:/var/run/docker.sock    
   # this image does not respect MARATHON_ env variables, so adding the params via command
   command: --master zk://zookeeper:2181/mesos --zk zk://zookeeper:2181/marathon
   
