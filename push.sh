@@ -6,4 +6,4 @@ else
    version="${1}"
 fi
 
-docker push localhost:5000/containersol/nodejs_app:"${version}"
+docker push docker.fenxibao.com/containersol/nodejs_app:"${version}"
