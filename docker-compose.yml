@@ -70,6 +70,7 @@ jenkins:
   image: docker.fenxibao.com/csanchez/jenkins-swarm
   volumes:
     - /mnt/sda1/jenkins_home:/mnt/sda1/jenkins_home
+    - /mnt/sda1/jenkins_data:/mnt/sda1/jenkins_data
     - /var/run/docker.sock:/var/run/docker.sock
     - /usr/bin/docker:/usr/bin/docker
   ports: 
