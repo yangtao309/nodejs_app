@@ -1,4 +1,4 @@
-FROM google/nodejs
+FROM docker.fenxibao.com/google/nodejs:latest
 
 WORKDIR /app
 ADD package.json /app/
