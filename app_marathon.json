@@ -5,11 +5,28 @@
         "image": "docker.fenxibao.com/containersol/nodejs_app:latest",
         "network": "BRIDGE",
         "portMappings": [
-          {"containerPort": 8000, "servicePort": 8000}
+          {
+	    "containerPort": 8000, 
+            "hostPort": 0,
+            "servicePort": 8900,
+            "protocol": "tcp"
+          }
         ]
-      }
+      },
+      "type": "DOCKER"
     },
-    "cpus": 0.2,
-    "mem": 512.0,
-    "instances": 1
+    "cpus": 0.03,
+    "mem": 64.0,
+    "instances": 3,
+    "healthChecks": [
+      {
+         "gracePeriodSeconds": 120,
+         "intervalSeconds": 30,
+         "maxConsecutiveFailures": 3,
+         "path": "/",
+         "portIndex": 0,
+         "protocol": "HTTP",
+         "timeoutSeconds": 5
+      }
+    ]
 }

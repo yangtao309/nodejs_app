@@ -1,95 +1,117 @@
-# Zookeeper: -p 2181:2181 -p 2888:2888 -p 3888:3888
-zookeeper:
-  image: docker.fenxibao.com/jplock/zookeeper:3.4.5
-  ports:
-    - "2181:2181"
-    
-master:
+# Based on https://github.com/breerly/fig-mesos
+# Note: use links: as a dependency graph for now, until https://github.com/docker/fig/pull/686 is resolved
+#
+# Zookeeper
+#
+# https://registry.hub.docker.com/u/jplock/zookeeper/
+#
+zk1:
+  image: jplock/zookeeper:3.4.6
+
+#
+# Mesos master
+#
+# https://registry.hub.docker.com/u/redjack/mesos-master/
+# http://mesos.apache.org/documentation/latest/configuration/
+#
+mesos1:
   image: docker.fenxibao.com/redjack/mesos-master:0.21.0
-  hostname: master
-  links:
-    - zookeeper:zookeeper
-  environment:
-    - MESOS_ZK=zk://zookeeper:2181/mesos
-    - MESOS_QUORUM=1
-    - MESOS_WORK_DIR=/var/lib/mesos
-    - MESOS_LOG_DIR=/var/log
   ports:
     - "5050:5050"
-    
-marathon:
-  image: docker.fenxibao.com/mesosphere/marathon:latest
   links:
-    - zookeeper:zookeeper
-  ports:
-    - "8090:8080"
-  volumes:                                                                               
-    - /var/run/docker.sock:/var/run/docker.sock    
-  # this image does not respect MARATHON_ env variables, so adding the params via command
-  command: --master zk://zookeeper:2181/mesos --zk zk://zookeeper:2181/marathon
-  
-slave:
+    - "zk1:zookeeper1"
+  environment:
+    MESOS_LOG_DIR: /var/log
+    MESOS_CLUSTER: localmesos
+    MESOS_ZK: zk://zookeeper1:2181/mesos
+    MESOS_HOSTNAME: 192.168.59.103
+    MESOS_WORK_DIR: /var/lib/mesos
+    MESOS_QUORUM: 1
+
+#
+# Mesos slaves
+#
+# https://registry.hub.docker.com/u/redjack/mesos-slave/
+# http://mesos.apache.org/documentation/latest/configuration/
+#
+slave1:
   image: docker.fenxibao.com/redjack/mesos-slave:0.21.0
-  links:
-    - zookeeper:zookeeper
-    - master:master
-  environment:
-    - MESOS_MASTER=zk://zookeeper:2181/mesos
-    - MESOS_EXECUTOR_REGISTRATION_TIMEOUT=5mins
-    - MESOS_LOG_DIR=/var/log
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-  expose:
-    - "5051:5051"
-
-slave5052:                                                                                   
-  image: docker.fenxibao.com/redjack/mesos-slave:0.21.0                                  
-  links:                                                                                 
-    - zookeeper:zookeeper                                                                
-    - master:master                                                                      
-  environment:                                                                           
-    - MESOS_MASTER=zk://zookeeper:2181/mesos                                             
-    - MESOS_EXECUTOR_REGISTRATION_TIMEOUT=5mins                                          
-    - MESOS_LOG_DIR=/var/log                                                             
-  volumes:                                                                               
-    - /var/run/docker.sock:/var/run/docker.sock                                          
-  expose:                                                                                
-    - "5052:5051" 
-    
-chronos:
-  image: docker.fenxibao.com/boritzio/docker-chronos:latest
-  links:
-    - zookeeper:zookeeper
-    - master:master
-  environment:
-    - MESOS_ZK=zk://zookeeper:2181/mesos
-    - CHRONOS_ZK=zk://zookeeper:2181
   ports:
-    - "8070:8081"
-    - "4400:4400"
- 
-jenkins:
-  image: docker.fenxibao.com/csanchez/jenkins-swarm
-  volumes:
-    - /mnt/sda1/jenkins_home:/mnt/sda1/jenkins_home
-    - /mnt/sda1/jenkins_data:/mnt/sda1/jenkins_data
-    - /var/run/docker.sock:/var/run/docker.sock
-    - /usr/bin/docker:/usr/bin/docker
-  ports: 
-    - "8080:8080"
-    - "50000:50000"
-    
-jenkinsSlave1:
-  image: docker.fenxibao.com/spiddy/dind-jenkins-slave
-  links: 
-    - jenkins:master
+    - "5051:5051"
+  links:
+    - "zk1:zookeeper1"
+    - "mesos1"
+  environment:
+    MESOS_MASTER: zk://zookeeper1:2181/mesos
+    MESOS_ISOLATOR: "cgroups/cpu,cgroups/mem"
+    MESOS_CONTAINERIZERS: "docker,mesos"
+    MESOS_EXECUTOR_REGISTRATION_TIMEOUT: "5mins"
+    MESOS_HOSTNAME: 192.168.59.103
+    MESOS_PORT: "5051"
+    MESOS_LOG_DIR: /var/log
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
+    - /usr/local/bin/docker:/usr/local/bin/docker
+    - /sys/fs/cgroup:/sys/fs/cgroup
+slave2:
+  image: docker.fenxibao.com/redjack/mesos-slave:0.21.0
+  ports:
+    - "5052:5052"
+  links:
+    - "zk1:zookeeper1"
+    - "mesos1"
+  environment:
+    MESOS_MASTER: zk://zookeeper1:2181/mesos
+    MESOS_ISOLATOR: "cgroups/cpu,cgroups/mem"
+    MESOS_CONTAINERIZERS: "docker,mesos"
+    MESOS_EXECUTOR_REGISTRATION_TIMEOUT: "5mins"
+    MESOS_HOSTNAME: 192.168.59.103
+    MESOS_PORT: "5052"
+    MESOS_LOG_DIR: /var/log
+  volumes_from:
+    - "slave1"
+slave3:
+  image: docker.fenxibao.com/redjack/mesos-slave:0.21.0
+  ports:
+    - "5053:5053"
+  links:
+    - "zk1:zookeeper1"
+    - "mesos1"
+  environment:
+    MESOS_MASTER: zk://zookeeper1:2181/mesos
+    MESOS_ISOLATOR: "cgroups/cpu,cgroups/mem"
+    MESOS_CONTAINERIZERS: "docker,mesos"
+    MESOS_EXECUTOR_REGISTRATION_TIMEOUT: "5mins"
+    MESOS_HOSTNAME: 192.168.59.103
+    MESOS_PORT: "5053"
+    MESOS_LOG_DIR: /var/log
+  volumes_from:
+    - "slave1"
 
-  
-jenkinsSlave2:
-  image: docker.fenxibao.com/spiddy/dind-jenkins-slave
-  links: 
-    - jenkins:master
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
+#
+# Marathon
+#
+# https://registry.hub.docker.com/u/mesosphere/marathon/
+#
+marathon:
+  image: mesosphere/marathon:v0.8.1
+  ports:
+    - "8080:8080"
+  links:
+    - "zk1:zookeeper1"
+    - "mesos1"
+  command: "--master zk://zookeeper1:2181/mesos --zk zk://zookeeper1:2181/marathon"
+
+#
+# Chronos
+#
+# https://registry.hub.docker.com/u/tomaskral/chronos
+#
+chronos:
+  image: tomaskral/chronos:2.3.2-mesos0.21.1
+  ports:
+    - "4400:8080"
+  links:
+    - "zk1:zookeeper1"
+    - mesos1
+  command: "--master zk://zookeeper1:2181/mesos --zk_hosts zk://zookeeper1:2181/mesos"
