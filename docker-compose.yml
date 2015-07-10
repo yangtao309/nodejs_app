@@ -6,7 +6,7 @@
 # https://registry.hub.docker.com/u/jplock/zookeeper/
 #
 zk1:
-  image: jplock/zookeeper:3.4.6
+  image: docker.fenxibao.com/jplock/zookeeper:3.4.6
 
 #
 # Mesos master
@@ -141,4 +141,3 @@ jenkinsSlave2:
     - jenkins:master                                       
   volumes:                                                 
     - /var/run/docker.sock:/var/run/docker.sock    
-
