@@ -115,3 +115,30 @@ chronos:
     - "zk1:zookeeper1"
     - mesos1
   command: "--master zk://zookeeper1:2181/mesos --zk_hosts zk://zookeeper1:2181/mesos"
+
+jenkins:                                                                                 
+  image: docker.fenxibao.com/csanchez/jenkins-swarm                                      
+  volumes:                                                                               
+    - /mnt/sda1/jenkins_home:/mnt/sda1/jenkins_home                                      
+    - /mnt/sda1/jenkins_data:/mnt/sda1/jenkins_data                                      
+    - /var/run/docker.sock:/var/run/docker.sock                                          
+    - /usr/bin/docker:/usr/bin/docker                                                    
+  ports:                                                                                 
+    - "8090:8080"                                                                        
+    - "50000:50000"                                                                      
+                                                                                         
+jenkinsSlave1:                                                                           
+  image: docker.fenxibao.com/spiddy/dind-jenkins-slave                                   
+  links:                                                                                 
+    - jenkins:master                                                           
+  volumes:                                                 
+    - /var/run/docker.sock:/var/run/docker.sock            
+                                                           
+                                                           
+jenkinsSlave2:                                             
+  image: docker.fenxibao.com/spiddy/dind-jenkins-slave     
+  links:                                                   
+    - jenkins:master                                       
+  volumes:                                                 
+    - /var/run/docker.sock:/var/run/docker.sock    
+
