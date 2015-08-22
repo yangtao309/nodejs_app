@@ -94,7 +94,7 @@ slave3:
 # https://registry.hub.docker.com/u/mesosphere/marathon/
 #
 marathon:
-  image: mesosphere/marathon:v0.8.1
+  image: docker.fenxibao.com/mesosphere/marathon:v0.8.1
   ports:
     - "8080:8080"
   links:
@@ -108,7 +108,7 @@ marathon:
 # https://registry.hub.docker.com/u/tomaskral/chronos
 #
 chronos:
-  image: tomaskral/chronos:2.3.2-mesos0.21.1
+  image: docker.fenxibao.com/tomaskral/chronos:2.3.2-mesos0.21.1
   ports:
     - "4400:8080"
   links:
